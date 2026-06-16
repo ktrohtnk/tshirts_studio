@@ -1,0 +1,327 @@
+// DOM Elements
+const fileInput = document.getElementById('fileInput');
+const currentFile = document.getElementById('currentFile');
+const loadingOverlay = document.getElementById('loadingOverlay');
+const exportBtn = document.getElementById('exportBtn');
+const viewBtns = document.querySelectorAll('.view-btn');
+const viewCards = document.querySelectorAll('.view-card');
+const previewContainer = document.getElementById('previewContainer');
+const viewSelectors = document.querySelectorAll('.view-btn');
+const designElements = document.querySelectorAll('.design-element');
+
+// View Switching
+viewSelectors.forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Remove active class from all buttons
+        viewSelectors.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const targetId = btn.getAttribute('data-target');
+
+        if (targetId === 'view-all') {
+            previewContainer.classList.add('grid-view');
+            // When in grid view, we don't need to change active class on view-cards
+            // because CSS handles forcing them all to display.
+        } else {
+            previewContainer.classList.remove('grid-view');
+            
+            // Remove active class from all view cards
+            const viewCards = document.querySelectorAll('.view-card');
+            viewCards.forEach(card => card.classList.remove('active'));
+
+            // Add active class to target view card
+            const targetCard = document.getElementById(targetId);
+            if (targetCard) targetCard.classList.add('active');
+        }
+    });
+});
+
+// Card Delete Buttons
+const cardDeleteBtns = document.querySelectorAll('.card-delete-btn');
+cardDeleteBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const viewCard = e.target.closest('.view-card');
+        if (!viewCard) return;
+        
+        const img = viewCard.querySelector('.design-img');
+        const el = viewCard.querySelector('.design-element');
+        
+        if (img && el) {
+            img.src = '';
+            el.classList.remove('active');
+            viewCard.classList.remove('has-design');
+        }
+        
+        // Reset file input text if no designs remain
+        const anyActive = document.querySelector('.design-element.active');
+        if (!anyActive) {
+            document.getElementById('currentFile').textContent = 'NO FILE SELECTED';
+            const fileInput = document.getElementById('fileInput');
+            if(fileInput) fileInput.value = '';
+        }
+    });
+});
+
+// Center elements initially
+designElements.forEach(el => {
+    const isInner = el.closest('#view-inner') !== null;
+    const initialX = isInner ? 280 : 250;
+    // Position inner tag much lower (y=450) so it spawns perfectly in the middle of the neck hole mask!
+    const initialY = isInner ? 450 : 250; 
+    
+    el.style.transform = `translate(${initialX}px, ${initialY}px)`;
+    el.setAttribute('data-x', initialX);
+    el.setAttribute('data-y', initialY);
+});
+
+// Scale tracking for responsive design
+function getScale(target) {
+    const card = target.closest('.view-card');
+    if (!card) return 1;
+    return card.offsetWidth / 800;
+}
+
+const resizeObserver = new ResizeObserver(entries => {
+    for (let entry of entries) {
+        const card = entry.target;
+        const container = card.querySelector('.mockup-container');
+        if (container) {
+            const scale = card.offsetWidth / 800;
+            container.style.transform = `scale(${scale})`;
+        }
+    }
+});
+viewCards.forEach(card => resizeObserver.observe(card));
+
+// Setup Drag and Resize using interact.js
+interact('.resizable-draggable')
+    .draggable({
+        inertia: true,
+        modifiers: [
+            interact.modifiers.restrictRect({
+                restriction: 'parent',
+                endOnly: true
+            })
+        ],
+        autoScroll: true,
+        listeners: {
+            move: dragMoveListener
+        }
+    })
+    .resizable({
+        edges: {
+            top: '.top-left, .top-right',
+            left: '.top-left, .bottom-left',
+            bottom: '.bottom-left, .bottom-right',
+            right: '.top-right, .bottom-right'
+        },
+        modifiers: [
+            interact.modifiers.aspectRatio({
+                ratio: 'preserve',
+            })
+        ],
+        inertia: true
+    })
+    .on('resizemove', function (event) {
+        var target = event.target;
+        var scale = getScale(target);
+        var x = (parseFloat(target.getAttribute('data-x')) || 0);
+        var y = (parseFloat(target.getAttribute('data-y')) || 0);
+
+        // event.rect is the physical screen rect, we need to divide by scale
+        var newWidth = event.rect.width / scale;
+        target.style.width = newWidth + 'px';
+
+        x += (event.deltaRect.left / scale);
+        y += (event.deltaRect.top / scale);
+
+        target.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+
+        target.setAttribute('data-x', x);
+        target.setAttribute('data-y', y);
+    });
+
+function dragMoveListener (event) {
+    var target = event.target;
+    var scale = getScale(target);
+    // keep the dragged position in the data-x/data-y attributes
+    var x = (parseFloat(target.getAttribute('data-x')) || 0) + (event.dx / scale);
+    var y = (parseFloat(target.getAttribute('data-y')) || 0) + (event.dy / scale);
+
+    // translate the element
+    target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+
+    // update the posiion attributes
+    target.setAttribute('data-x', x);
+    target.setAttribute('data-y', y);
+}
+
+
+function applyImageToCard(dataUrl, targetCard) {
+    if (!targetCard) return;
+    const img = targetCard.querySelector('.design-img');
+    const el = targetCard.querySelector('.design-element');
+    
+    if (img && el) {
+        img.src = dataUrl;
+        el.classList.add('active');
+        targetCard.classList.add('has-design');
+    }
+}
+
+function handleImageUpload(file, targetCard) {
+    const reader = new FileReader();
+    reader.onload = (f) => {
+        applyImageToCard(f.target.result, targetCard);
+    };
+    reader.readAsDataURL(file);
+}
+
+async function handlePsdUpload(file, targetCard) {
+    loadingOverlay.classList.add('active');
+    try {
+        const arrayBuffer = await file.arrayBuffer();
+        const psd = agPsd.readPsd(arrayBuffer);
+        
+        if (!psd.canvas) {
+            alert('Could not render PSD. Make sure the PSD is saved with Maximize Compatibility.');
+            loadingOverlay.classList.remove('active');
+            return;
+        }
+
+        const dataUrl = psd.canvas.toDataURL('image/png');
+        applyImageToCard(dataUrl, targetCard);
+    } catch (err) {
+        console.error(err);
+        alert('Error parsing PSD file.');
+    } finally {
+        loadingOverlay.classList.remove('active');
+    }
+}
+
+// Handle File Upload via Input
+fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const currentFileText = document.getElementById('currentFile');
+    currentFileText.textContent = file.name;
+
+    // Determine target card (active one, or default to front if in grid mode)
+    let targetCard = document.querySelector('.view-card.active');
+    if (!targetCard) targetCard = document.getElementById('view-front');
+
+    if (file.name.endsWith('.psd')) {
+        handlePsdUpload(file, targetCard);
+    } else {
+        handleImageUpload(file, targetCard);
+    }
+    
+    fileInput.value = ''; // reset
+});
+
+// Robust File Upload via Drag and Drop
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    window.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    }, false);
+});
+
+window.addEventListener('dragover', (e) => {
+    let card = e.target.closest('.view-card');
+    
+    // If dragging outside a card, default to the currently active one
+    if (!card) {
+        card = document.querySelector('.view-card.active');
+    }
+    // If in ALL VIEWS and outside any card, default to front
+    if (!card) {
+        card = document.getElementById('view-front');
+    }
+
+    if (card) {
+        viewCards.forEach(c => c.classList.remove('drag-over'));
+        card.classList.add('drag-over');
+    }
+});
+
+window.addEventListener('dragleave', (e) => {
+    if (!e.relatedTarget) {
+        viewCards.forEach(c => c.classList.remove('drag-over'));
+    }
+});
+
+window.addEventListener('drop', (e) => {
+    viewCards.forEach(c => c.classList.remove('drag-over'));
+    
+    let card = e.target.closest('.view-card');
+    
+    // If dropped outside a card, default to the currently active one
+    if (!card) {
+        card = document.querySelector('.view-card.active');
+    }
+    // If in ALL VIEWS and outside any card, default to front
+    if (!card) {
+        card = document.getElementById('view-front');
+    }
+
+    if (!card) return;
+
+    const dt = e.dataTransfer;
+    const file = dt.files[0];
+    if (!file) return;
+
+    if (!file.name.match(/\.(jpg|jpeg|png|psd)$/i)) {
+        alert('Please drop a JPG, PNG, or PSD file.');
+        return;
+    }
+
+    const currentFileText = document.getElementById('currentFile');
+    currentFileText.textContent = file.name;
+
+    if (file.name.endsWith('.psd')) {
+        handlePsdUpload(file, card);
+    } else {
+        handleImageUpload(file, card);
+    }
+});
+
+// Export Handling
+exportBtn.addEventListener('click', async () => {
+    // Find the currently active view card
+    const activeCard = document.querySelector('.view-card.active');
+    if (!activeCard) return;
+    
+    const container = activeCard.querySelector('.mockup-container');
+    const viewName = activeCard.getAttribute('data-view');
+    
+    if (!container) return;
+
+    // Show loading
+    loadingOverlay.classList.add('active');
+
+    // We use html2canvas to snapshot the DOM element
+    // We set a high scale for a better quality export
+    try {
+        const canvas = await html2canvas(container, {
+            scale: 2, // Double resolution export
+            useCORS: true,
+            backgroundColor: null,
+            logging: false
+        });
+
+        const dataURL = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = `tshirt_mockup_${viewName}.png`;
+        link.href = dataURL;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch(e) {
+        console.error(e);
+        alert("Error exporting image.");
+    } finally {
+        loadingOverlay.classList.remove('active');
+    }
+});

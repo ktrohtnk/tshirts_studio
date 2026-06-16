@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coordinate Tool</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: sans-serif; background: #333; color: white; display: flex; flex-direction: column; align-items: center; }
+        .container { position: relative; display: inline-block; box-shadow: 0 0 20px rgba(0,0,0,0.5); background: white; margin-bottom: 20px; }
+        img { display: block; width: 1024px; height: 1024px; }
+        .grid-canvas { position: absolute; top: 0; left: 0; cursor: crosshair; }
+        .controls { display: flex; gap: 20px; align-items: center; background: #222; padding: 15px; border-radius: 8px; }
+        select, button { padding: 8px 16px; font-size: 16px; border-radius: 4px; border: none; cursor: pointer; }
+        button { background: #00f3ff; color: black; font-weight: bold; }
+        button:hover { background: #00c3cc; }
+        #coords { font-size: 20px; font-family: monospace; color: #00f3ff; min-width: 200px; text-align: center; }
+        #clickLog { margin-top: 20px; background: #111; padding: 15px; border-radius: 8px; width: 100%; max-width: 800px; max-height: 200px; overflow-y: auto; font-family: monospace; }
+        .log-entry { margin: 5px 0; padding: 5px; border-bottom: 1px solid #333; }
+        .btn-clear { background: #ff4444; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <label>View Image: </label>
+        <select id="imageSelect">
+            <option value="assets/inner_tag.png">Inner Tag</option>
+            <option value="assets/front.png">Front</option>
+            <option value="assets/back.png">Back</option>
+            <option value="assets/outer_collar.png">Collar Back</option>
+        </select>
+        <div id="coords">X: 0, Y: 0</div>
+        <button id="clearLog" class="btn-clear">Clear Points</button>
+    </div>
+
+    <div class="container">
+        <img id="baseImage" src="assets/inner_tag.png" alt="Base">
+        <canvas id="gridCanvas" class="grid-canvas" width="1024" height="1024"></canvas>
+    </div>
+
+    <div id="clickLog">
+        <h3>Click on the image to log coordinates here:</h3>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gridCanvas');
+        const ctx = canvas.getContext('2d');
+        const coordsDisplay = document.getElementById('coords');
+        const imageSelect = document.getElementById('imageSelect');
+        const baseImage = document.getElementById('baseImage');
+        const clickLog = document.getElementById('clickLog');
+        const clearBtn = document.getElementById('clearLog');
+
+        let points = [];
+
+        function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.strokeStyle = 'rgba(0, 243, 255, 0.2)';
+            ctx.lineWidth = 1;
+            
+            // Draw 50px grid
+            for(let x = 0; x <= canvas.width; x += 50) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+                if(x % 100 === 0) { ctx.fillStyle = 'rgba(0, 243, 255, 0.5)'; ctx.fillText(x, x+2, 12); }
+            }
+            for(let y = 0; y <= canvas.height; y += 50) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+                if(y % 100 === 0 && y > 0) { ctx.fillStyle = 'rgba(0, 243, 255, 0.5)'; ctx.fillText(y, 2, y-2); }
+            }
+
+            // Draw points
+            points.forEach((p, i) => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#ff0055';
+                ctx.fill();
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '14px monospace';
+                ctx.fillText(`P${i+1} (${p.x}, ${p.y})`, p.x + 8, p.y + 4);
+            });
+        }
+
+        imageSelect.addEventListener('change', (e) => {
+            baseImage.src = e.target.value;
+            points = [];
+            clickLog.innerHTML = '<h3>Click on the image to log coordinates here:</h3>';
+            drawGrid();
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = Math.round((e.clientX - rect.left) * scaleX);
+            const y = Math.round((e.clientY - rect.top) * scaleY);
+            
+            coordsDisplay.textContent = `X: ${x}, Y: ${y}`;
+            drawGrid();
+            
+            // Crosshair
+            ctx.strokeStyle = '#00f3ff';
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            coordsDisplay.textContent = `X: 0, Y: 0`;
+            drawGrid();
+        });
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = Math.round((e.clientX - rect.left) * scaleX);
+            const y = Math.round((e.clientY - rect.top) * scaleY);
+            
+            points.push({x, y});
+            drawGrid();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `<strong>Point ${points.length}:</strong> x: <span style="color:#00f3ff">${x}</span>, y: <span style="color:#00f3ff">${y}</span>`;
+            clickLog.appendChild(logEntry);
+            clickLog.scrollTop = clickLog.scrollHeight;
+        });
+
+        clearBtn.addEventListener('click', () => {
+            points = [];
+            clickLog.innerHTML = '<h3>Click on the image to log coordinates here:</h3>';
+            drawGrid();
+        });
+
+        baseImage.onload = () => drawGrid();
+    </script>
+</body>
+</html>

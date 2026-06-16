@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T-SHIRT STUDIO</title>
+    <link rel="stylesheet" href="style.css?v=12">
+    <link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Libraries -->
+    <script src="https://unpkg.com/ag-psd@21.0.0/dist/bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        
+        <main class="main-content">
+            <div class="preview-container" id="previewContainer">
+                
+                <!-- FRONT VIEW -->
+                <div class="view-card active" id="view-front" data-view="front">
+                    <button class="card-delete-btn" title="Remove Design">✕</button>
+                    <div class="drop-hint">DRAG & DROP<br>DESIGN HERE</div>
+                    <div class="mockup-container" id="container-front">
+                        <img class="base-shirt" src="assets/front.png" crossorigin="anonymous">
+                        <div class="design-area masked-area">
+                            <div class="design-element resizable-draggable">
+                                <img class="design-img" src="" alt="design">
+                                <div class="resize-handle top-left"></div>
+                                <div class="resize-handle top-right"></div>
+                                <div class="resize-handle bottom-left"></div>
+                                <div class="resize-handle bottom-right"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BACK VIEW -->
+                <div class="view-card" id="view-back" data-view="back">
+                    <button class="card-delete-btn" title="Remove Design">✕</button>
+                    <div class="drop-hint">DRAG & DROP<br>DESIGN HERE</div>
+                    <div class="mockup-container" id="container-back">
+                        <img class="base-shirt" src="assets/back.png" crossorigin="anonymous">
+                        <div class="design-area masked-area">
+                            <div class="design-element resizable-draggable">
+                                <img class="design-img" src="" alt="design">
+                                <div class="resize-handle top-left"></div>
+                                <div class="resize-handle top-right"></div>
+                                <div class="resize-handle bottom-left"></div>
+                                <div class="resize-handle bottom-right"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INNER TAG VIEW -->
+                <div class="view-card" id="view-inner" data-view="inner_tag">
+                    <button class="card-delete-btn" title="Remove Design">✕</button>
+                    <div class="drop-hint">DRAG & DROP<br>DESIGN HERE</div>
+                    <div class="mockup-container" id="container-inner">
+                        <img class="base-shirt" src="assets/inner_tag.png" crossorigin="anonymous">
+                        <div class="design-area masked-area">
+                            <div class="design-element resizable-draggable">
+                                <img class="design-img" src="" alt="design">
+                                <div class="resize-handle top-left"></div>
+                                <div class="resize-handle top-right"></div>
+                                <div class="resize-handle bottom-left"></div>
+                                <div class="resize-handle bottom-right"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLLAR BACK VIEW (NO MASK) -->
+                <div class="view-card" id="view-collar" data-view="outer_collar">
+                    <button class="card-delete-btn" title="Remove Design">✕</button>
+                    <div class="drop-hint">DRAG & DROP<br>DESIGN HERE</div>
+                    <div class="mockup-container" id="container-collar">
+                        <img class="base-shirt" src="assets/outer_collar.png" crossorigin="anonymous">
+                        <div class="design-area unmasked-area">
+                            <div class="design-element resizable-draggable">
+                                <img class="design-img" src="" alt="design">
+                                <div class="resize-handle top-left"></div>
+                                <div class="resize-handle top-right"></div>
+                                <div class="resize-handle bottom-left"></div>
+                                <div class="resize-handle bottom-right"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+        
+        <aside class="sidebar">
+            <header class="header">
+                <h1>T-SHIRT STUDIO</h1>
+            </header>
+
+            <div class="control-section">
+                <h2>VIEW</h2>
+                <div class="view-selectors" id="viewSelectors">
+                    <button class="view-btn active" data-target="view-front">FRONT</button>
+                    <button class="view-btn" data-target="view-back">BACK</button>
+                    <button class="view-btn" data-target="view-inner">INNER TAG</button>
+                    <button class="view-btn" data-target="view-collar">COLLAR BACK</button>
+                    <button class="view-btn" data-target="view-all" style="margin-top: 1rem; border-top: 1px solid #000; padding-top: 1rem;">ALL VIEWS</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h2>ARTWORK</h2>
+                <label class="upload-btn" for="fileInput">
+                    UPLOAD DESIGN (JPG/PNG/PSD)
+                </label>
+                <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.psd" hidden>
+                <div class="current-file" id="currentFile">NO FILE SELECTED</div>
+            </div>
+
+            <div class="control-section" style="margin-top: auto;">
+                <button class="export-btn-large" id="exportBtn">EXPORT VIEW</button>
+            </div>
+        </aside>
+
+    </div>
+    
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+    
+    <!-- Custom Script -->
+    <script src="app.js?v=9"></script>
+</body>
+</html>

@@ -325,3 +325,47 @@ exportBtn.addEventListener('click', async () => {
         loadingOverlay.classList.remove('active');
     }
 });
+
+/* =========================================================================
+   MOBILE RESPONSIVE LOGIC
+   ========================================================================= */
+
+document.addEventListener('DOMContentLoaded', () => {
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const menuBackdrop = document.getElementById('menuBackdrop');
+    const sidebar = document.getElementById('sidebar');
+
+    function toggleMenu() {
+        sidebar.classList.toggle('open');
+        menuBackdrop.classList.toggle('open');
+    }
+
+    function closeMenu() {
+        sidebar.classList.remove('open');
+        menuBackdrop.classList.remove('open');
+    }
+
+    if (mobileMenuBtn && menuBackdrop && sidebar) {
+        mobileMenuBtn.addEventListener('click', toggleMenu);
+        menuBackdrop.addEventListener('click', closeMenu);
+        
+        // Auto-close menu when a view is selected on mobile
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    closeMenu();
+                }
+            });
+        });
+
+        // Auto-close menu when file is selected
+        const fileInput = document.getElementById('fileInput');
+        if(fileInput) {
+            fileInput.addEventListener('change', () => {
+                if (window.innerWidth <= 768) {
+                    closeMenu();
+                }
+            });
+        }
+    }
+});

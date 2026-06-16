@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>T-SHIRT STUDIO</title>
-    <link rel="stylesheet" href="style.css?v=12">
+    <link rel="stylesheet" href="style.css?v=13">
     <link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;700&display=swap" rel="stylesheet">
     
     <!-- Libraries -->
@@ -93,7 +93,9 @@
             </div>
         </main>
         
-        <aside class="sidebar">
+        <div class="menu-backdrop" id="menuBackdrop"></div>
+        <aside class="sidebar" id="sidebar">
+            <div class="bottom-sheet-handle"></div>
             <header class="header">
                 <h1>T-SHIRT STUDIO</h1>
             </header>
@@ -129,7 +131,14 @@
         <div class="spinner"></div>
     </div>
     
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12h18M3 6h18M3 18h18"></path>
+        </svg>
+        MENU
+    </button>
+    
     <!-- Custom Script -->
-    <script src="app.js?v=9"></script>
+    <script src="app.js?v=10"></script>
 </body>
 </html>

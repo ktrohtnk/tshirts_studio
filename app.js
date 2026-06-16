@@ -139,6 +139,18 @@ interact('.resizable-draggable')
 
         target.setAttribute('data-x', x);
         target.setAttribute('data-y', y);
+    })
+    .gesturable({
+        listeners: {
+            move(event) {
+                var target = event.target;
+                var currentWidth = parseFloat(target.style.width) || target.offsetWidth || 300;
+                // event.ds is the difference in scale
+                var newWidth = currentWidth * (1 + event.ds);
+                
+                target.style.width = newWidth + 'px';
+            }
+        }
     });
 
 function dragMoveListener (event) {
@@ -287,37 +299,101 @@ window.addEventListener('drop', (e) => {
     }
 });
 
-// Export Handling
+// Export Handling - Native Canvas Composite
 exportBtn.addEventListener('click', async () => {
-    // Find the currently active view card
     const activeCard = document.querySelector('.view-card.active');
     if (!activeCard) return;
     
     const container = activeCard.querySelector('.mockup-container');
     const viewName = activeCard.getAttribute('data-view');
+    const baseShirtImg = activeCard.querySelector('.base-shirt');
+    const designImg = activeCard.querySelector('.design-img');
+    const designElement = activeCard.querySelector('.design-element');
     
-    if (!container) return;
+    if (!container || !baseShirtImg) return;
 
-    // Show loading
     loadingOverlay.classList.add('active');
 
-    // We use html2canvas to snapshot the DOM element
-    // We set a high scale for a better quality export
     try {
-        const canvas = await html2canvas(container, {
-            scale: 2, // Double resolution export
-            useCORS: true,
-            backgroundColor: null,
-            logging: false
-        });
+        const canvas = document.createElement('canvas');
+        canvas.width = 800;
+        canvas.height = 800;
+        const ctx = canvas.getContext('2d');
+
+        // Draw Base Shirt
+        ctx.drawImage(baseShirtImg, 0, 0, 800, 800);
+
+        // Draw Design if active
+        if (designElement.classList.contains('active') && designImg.src) {
+            const designCanvas = document.createElement('canvas');
+            designCanvas.width = 800;
+            designCanvas.height = 800;
+            const dCtx = designCanvas.getContext('2d');
+
+            // Calculate design element position
+            const x = parseFloat(designElement.getAttribute('data-x')) || 0;
+            const y = parseFloat(designElement.getAttribute('data-y')) || 0;
+            const width = parseFloat(designElement.style.width) || designElement.offsetWidth || 300;
+            
+            // We need to determine the height based on aspect ratio
+            const imgAspect = designImg.naturalHeight / designImg.naturalWidth;
+            const height = width * imgAspect;
+
+            // Draw design onto temp canvas
+            dCtx.drawImage(designImg, x, y, width, height);
+
+            // Apply Mask if not collar
+            if (viewName !== 'outer_collar') {
+                const maskImg = new Image();
+                maskImg.crossOrigin = "anonymous";
+                maskImg.src = `assets/mask_${viewName.replace('_tag', '')}.png`;
+                await new Promise((resolve) => {
+                    maskImg.onload = resolve;
+                    maskImg.onerror = resolve; // proceed even if mask fails
+                });
+
+                if (maskImg.complete && maskImg.naturalWidth > 0) {
+                    dCtx.globalCompositeOperation = 'destination-in';
+                    dCtx.drawImage(maskImg, 0, 0, 800, 800);
+                }
+            }
+
+            // Draw masked design onto main canvas
+            ctx.drawImage(designCanvas, 0, 0);
+        }
 
         const dataURL = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.download = `tshirt_mockup_${viewName}.png`;
-        link.href = dataURL;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        
+        // Mobile iOS Web Share API for Camera Roll
+        let shared = false;
+        if (navigator.share) {
+            try {
+                const response = await fetch(dataURL);
+                const blob = await response.blob();
+                const file = new File([blob], `tshirt_mockup_${viewName}.png`, { type: 'image/png' });
+                
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: 'T-Shirt Design',
+                    });
+                    shared = true;
+                }
+            } catch (err) {
+                console.log("Share API failed or user cancelled", err);
+            }
+        }
+
+        // Fallback for Desktop or if Share API is unavailable
+        if (!shared) {
+            const link = document.createElement('a');
+            link.download = `tshirt_mockup_${viewName}.png`;
+            link.href = dataURL;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
     } catch(e) {
         console.error(e);
         alert("Error exporting image.");

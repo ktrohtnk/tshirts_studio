@@ -546,9 +546,14 @@ body {
     }
 
     .preview-container.grid-view {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto;
-        overflow-y: auto;
-        align-items: flex-start;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        padding-bottom: 80px;
+        align-content: center;
+        justify-content: center;
+        height: 100%;
     }
 }

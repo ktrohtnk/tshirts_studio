@@ -211,9 +211,30 @@ async function handlePsdUpload(file, targetCard) {
         const psd = agPsd.readPsd(arrayBuffer);
         
         if (!psd.canvas) {
-            alert('Could not render PSD. Make sure the PSD is saved with Maximize Compatibility.');
-            loadingOverlay.classList.remove('active');
-            return;
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = psd.width;
+            tempCanvas.height = psd.height;
+            const tCtx = tempCanvas.getContext('2d');
+            let hasDrawn = false;
+            
+            if (psd.children) {
+                for (let i = psd.children.length - 1; i >= 0; i--) {
+                    const layer = psd.children[i];
+                    if (!layer.hidden && layer.canvas) {
+                        tCtx.globalAlpha = layer.opacity !== undefined ? layer.opacity / 255 : 1;
+                        tCtx.drawImage(layer.canvas, layer.left || 0, layer.top || 0);
+                        hasDrawn = true;
+                    }
+                }
+            }
+
+            if (hasDrawn) {
+                psd.canvas = tempCanvas;
+            } else {
+                alert('Could not render PSD. Make sure the PSD is saved with Maximize Compatibility.');
+                loadingOverlay.classList.remove('active');
+                return;
+            }
         }
 
         const dataUrl = psd.canvas.toDataURL('image/png');
@@ -238,7 +259,7 @@ fileInput.addEventListener('change', (e) => {
     let targetCard = document.querySelector('.view-card.active');
     if (!targetCard) targetCard = document.getElementById('view-front');
 
-    if (file.name.endsWith('.psd')) {
+    if (file.name.toLowerCase().endsWith('.psd')) {
         handlePsdUpload(file, targetCard);
     } else {
         handleImageUpload(file, targetCard);
@@ -307,7 +328,7 @@ window.addEventListener('drop', (e) => {
     const currentFileText = document.getElementById('currentFile');
     currentFileText.textContent = file.name;
 
-    if (file.name.endsWith('.psd')) {
+    if (file.name.toLowerCase().endsWith('.psd')) {
         handlePsdUpload(file, card);
     } else {
         handleImageUpload(file, card);

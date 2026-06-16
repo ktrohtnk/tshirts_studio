@@ -78,7 +78,22 @@ designElements.forEach(el => {
 function getScale(target) {
     const card = target.closest('.view-card');
     if (!card) return 1;
-    return card.offsetWidth / 800;
+    
+    const isMobile = window.innerWidth <= 768;
+    const isGridView = document.getElementById('previewContainer').classList.contains('grid-view');
+    
+    // Default: scale to fit width
+    let scale = card.offsetWidth / 800;
+    
+    // On mobile single view (9:16 ratio), scale up to fill vertical space better
+    // We use a blend of width and height to make it immersive without cutting off too much.
+    if (isMobile && !isGridView) {
+        const heightScale = card.offsetHeight / 800;
+        // Use heightScale * 0.85 so it fills most of the vertical space, cropping sides.
+        scale = Math.max(scale, heightScale * 0.85);
+    }
+    
+    return scale;
 }
 
 const resizeObserver = new ResizeObserver(entries => {
@@ -86,8 +101,8 @@ const resizeObserver = new ResizeObserver(entries => {
         const card = entry.target;
         const container = card.querySelector('.mockup-container');
         if (container) {
-            const scale = card.offsetWidth / 800;
-            container.style.transform = `scale(${scale})`;
+            const scale = getScale(container);
+            container.style.transform = `translate(-50%, -50%) scale(${scale})`;
         }
     }
 });
@@ -342,20 +357,21 @@ exportBtn.addEventListener('click', async () => {
             // Draw design onto temp canvas
             dCtx.drawImage(designImg, x, y, width, height);
 
-            // Apply Mask if not collar
-            if (viewName !== 'outer_collar') {
-                const maskImg = new Image();
-                maskImg.crossOrigin = "anonymous";
-                maskImg.src = `assets/mask_${viewName.replace('_tag', '')}.png`;
-                await new Promise((resolve) => {
-                    maskImg.onload = resolve;
-                    maskImg.onerror = resolve; // proceed even if mask fails
-                });
+            // Apply Mask
+            const maskImg = new Image();
+            maskImg.crossOrigin = "anonymous";
+            // viewName is 'front', 'back', 'inner_tag', or 'outer_collar'
+            let maskName = viewName.replace('_tag', '').replace('outer_', '');
+            maskImg.src = `assets/mask_${maskName}.png`;
+            
+            await new Promise((resolve) => {
+                maskImg.onload = resolve;
+                maskImg.onerror = resolve; // proceed even if mask fails
+            });
 
-                if (maskImg.complete && maskImg.naturalWidth > 0) {
-                    dCtx.globalCompositeOperation = 'destination-in';
-                    dCtx.drawImage(maskImg, 0, 0, 800, 800);
-                }
+            if (maskImg.complete && maskImg.naturalWidth > 0) {
+                dCtx.globalCompositeOperation = 'destination-in';
+                dCtx.drawImage(maskImg, 0, 0, 800, 800);
             }
 
             // Draw masked design onto main canvas

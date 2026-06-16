@@ -260,10 +260,11 @@ body {
 
 .mockup-container {
     position: absolute;
-    top: 0; left: 0;
+    top: 50%; left: 50%;
     width: 800px; 
     height: 800px;
-    transform-origin: top left;
+    transform: translate(-50%, -50%);
+    transform-origin: center center;
 }
 
 .base-shirt {
@@ -305,7 +306,7 @@ body {
     -webkit-mask-size: contain; -webkit-mask-position: center; -webkit-mask-repeat: no-repeat;
 }
 
-#container-collar .unmasked-area {
+#container-collar .masked-area {
     mask-image: url('assets/mask_collar.png?v=10');
     mask-size: contain; mask-position: center; mask-repeat: no-repeat;
     -webkit-mask-image: url('assets/mask_collar.png?v=10');
@@ -471,9 +472,15 @@ body {
     }
 
     .preview-container {
-        padding: 1rem;
+        padding: 0;
         /* Make room for the floating button */
         padding-bottom: 80px;
+    }
+    
+    .view-card {
+        aspect-ratio: 9 / 16;
+        border-radius: 0;
+        box-shadow: none;
     }
 
     .mobile-menu-btn {
@@ -555,5 +562,10 @@ body {
         align-content: center;
         justify-content: center;
         height: 100%;
+    }
+
+    .preview-container.grid-view .view-card {
+        aspect-ratio: 1 / 1;
+        border-radius: 12px;
     }
 }

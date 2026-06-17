@@ -396,7 +396,9 @@ exportBtn.addEventListener('click', async () => {
             }
 
             // Draw masked design onto main canvas
+            ctx.globalCompositeOperation = 'multiply';
             ctx.drawImage(designCanvas, 0, 0);
+            ctx.globalCompositeOperation = 'source-over'; // restore defaults
         }
 
         const dataURL = canvas.toDataURL('image/png');

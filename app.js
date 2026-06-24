@@ -527,10 +527,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentGender = 'male';
     let currentSize = 'M';
+    let customOffsetX = 0;
+    let customOffsetY = 0;
 
     function updateModelView() {
         // Update image and mask based on gender with cache buster
-        const cacheBust = '?v=8';
+        const cacheBust = '?v=9';
         baseImg.src = `assets/model_${currentGender}.png${cacheBust}`;
         maskArea.style.maskImage = `url('assets/mask_model_${currentGender}.png${cacheBust}')`;
         maskArea.style.webkitMaskImage = `url('assets/mask_model_${currentGender}.png${cacheBust}')`;
@@ -543,8 +545,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const baseX = parseFloat(designElement.getAttribute('data-x')) || 0;
         const baseY = parseFloat(designElement.getAttribute('data-y')) || 0;
         
-        const finalX = baseX + config.offsetX;
-        const finalY = baseY + config.offsetY;
+        const finalX = baseX + config.offsetX + customOffsetX;
+        const finalY = baseY + config.offsetY + customOffsetY;
         
         // The scale applies around the center of the design
         designElement.style.transform = `translate(${finalX}px, ${finalY}px) scale(${multiplier})`;
@@ -556,6 +558,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const frontEl = frontCard.querySelector('.design-element');
         
         if (frontEl.classList.contains('active') && frontImg.src) {
+            customOffsetX = 0;
+            customOffsetY = 0;
             designImg.src = frontImg.src;
             designElement.style.display = 'block';
             
@@ -596,6 +600,9 @@ document.addEventListener('DOMContentLoaded', () => {
             genderBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentGender = btn.getAttribute('data-val');
+            // Reset custom drag offsets when changing styles
+            customOffsetX = 0;
+            customOffsetY = 0;
             updateModelView();
         });
     });
@@ -605,7 +612,23 @@ document.addEventListener('DOMContentLoaded', () => {
             sizeBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentSize = btn.getAttribute('data-val');
+            // Keep custom offsets when changing sizes
             updateModelView();
         });
+    });
+
+    // Make the model design element draggable
+    interact(designElement).draggable({
+        listeners: {
+            move(event) {
+                const config = modelConfig[currentGender];
+                const multiplier = (sizeMultipliers[currentSize] || 1.0) * config.scale;
+                
+                // Convert screen movement pixels to visual pixels based on scale
+                customOffsetX += event.dx / multiplier;
+                customOffsetY += event.dy / multiplier;
+                updateModelView();
+            }
+        }
     });
 });

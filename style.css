@@ -709,7 +709,7 @@ body {
 
 /* We don't need resize handles on the model view, it's just a preview */
 #modelDesignElement {
-    pointer-events: none;
+    cursor: move;
 }
 
 #modelDesignElement .resize-handle {

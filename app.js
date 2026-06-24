@@ -530,7 +530,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateModelView() {
         // Update image and mask based on gender with cache buster
-        const cacheBust = '?v=4';
+        const cacheBust = '?v=5';
         baseImg.src = `assets/model_${currentGender}.png${cacheBust}`;
         maskArea.style.maskImage = `url('assets/mask_model_${currentGender}.png${cacheBust}')`;
         maskArea.style.webkitMaskImage = `url('assets/mask_model_${currentGender}.png${cacheBust}')`;

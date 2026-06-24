@@ -511,21 +511,43 @@ document.addEventListener('DOMContentLoaded', () => {
         'XL': 0.78
     };
 
+    // Offset configurations to map from flat shirt coordinates to model shirt coordinates
+    const modelConfig = {
+        male: {
+            offsetX: 0,
+            offsetY: 130, // move down
+            scale: 0.70  // model shirt is smaller in the frame
+        },
+        female: {
+            offsetX: 0,
+            offsetY: 110,
+            scale: 0.65
+        }
+    };
+
     let currentGender = 'male';
     let currentSize = 'M';
-    let baseDesignScale = 1.0;
 
     function updateModelView() {
-        // Update image and mask based on gender
-        baseImg.src = `assets/model_${currentGender}.png`;
-        maskArea.style.maskImage = `url('assets/mask_model_${currentGender}.png')`;
-        maskArea.style.webkitMaskImage = `url('assets/mask_model_${currentGender}.png')`;
+        // Update image and mask based on gender with cache buster
+        const cacheBust = '?v=3';
+        baseImg.src = `assets/model_${currentGender}.png${cacheBust}`;
+        maskArea.style.maskImage = `url('assets/mask_model_${currentGender}.png${cacheBust}')`;
+        maskArea.style.webkitMaskImage = `url('assets/mask_model_${currentGender}.png${cacheBust}')`;
         
-        // Apply size multiplier to the base design size
-        const multiplier = sizeMultipliers[currentSize] || 1.0;
+        const config = modelConfig[currentGender];
+        
+        // Apply size multiplier combined with the model's base scale
+        const multiplier = (sizeMultipliers[currentSize] || 1.0) * config.scale;
+        
+        const baseX = parseFloat(designElement.getAttribute('data-x')) || 0;
+        const baseY = parseFloat(designElement.getAttribute('data-y')) || 0;
+        
+        const finalX = baseX + config.offsetX;
+        const finalY = baseY + config.offsetY;
         
         // The scale applies around the center of the design
-        designElement.style.transform = `translate(${designElement.getAttribute('data-x')}px, ${designElement.getAttribute('data-y')}px) scale(${multiplier})`;
+        designElement.style.transform = `translate(${finalX}px, ${finalY}px) scale(${multiplier})`;
     }
 
     function syncDesignFromFront() {

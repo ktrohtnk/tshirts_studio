@@ -484,3 +484,106 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+/* =========================================================================
+   MODEL PREVIEW LOGIC
+   ========================================================================= */
+document.addEventListener('DOMContentLoaded', () => {
+    const openBtn = document.getElementById('openModelPreviewBtn');
+    const closeBtn = document.getElementById('closeModelModalBtn');
+    const modal = document.getElementById('modelModal');
+    
+    const genderBtns = document.querySelectorAll('#genderToggle .toggle-btn');
+    const sizeBtns = document.querySelectorAll('#sizeToggle .toggle-btn');
+    
+    const baseImg = document.getElementById('modelBaseImage');
+    const maskArea = document.getElementById('modelMaskArea');
+    const designImg = document.getElementById('modelDesignImg');
+    const designElement = document.getElementById('modelDesignElement');
+    
+    // Scale simulation multipliers relative to M
+    // S: Design looks larger on the shirt
+    // XL: Design looks smaller on the shirt
+    const sizeMultipliers = {
+        'S': 1.15,
+        'M': 1.0,
+        'L': 0.88,
+        'XL': 0.78
+    };
+
+    let currentGender = 'male';
+    let currentSize = 'M';
+    let baseDesignScale = 1.0;
+
+    function updateModelView() {
+        // Update image and mask based on gender
+        baseImg.src = `assets/model_${currentGender}.png`;
+        maskArea.style.maskImage = `url('assets/mask_model_${currentGender}.png')`;
+        maskArea.style.webkitMaskImage = `url('assets/mask_model_${currentGender}.png')`;
+        
+        // Apply size multiplier to the base design size
+        const multiplier = sizeMultipliers[currentSize] || 1.0;
+        
+        // The scale applies around the center of the design
+        designElement.style.transform = `translate(${designElement.getAttribute('data-x')}px, ${designElement.getAttribute('data-y')}px) scale(${multiplier})`;
+    }
+
+    function syncDesignFromFront() {
+        const frontCard = document.getElementById('view-front');
+        const frontImg = frontCard.querySelector('.design-img');
+        const frontEl = frontCard.querySelector('.design-element');
+        
+        if (frontEl.classList.contains('active') && frontImg.src) {
+            designImg.src = frontImg.src;
+            designElement.style.display = 'block';
+            
+            // We copy over the physical width
+            designElement.style.width = frontEl.style.width || frontEl.offsetWidth + 'px';
+            
+            // And position
+            const x = parseFloat(frontEl.getAttribute('data-x')) || 0;
+            const y = parseFloat(frontEl.getAttribute('data-y')) || 0;
+            designElement.setAttribute('data-x', x);
+            designElement.setAttribute('data-y', y);
+        } else {
+            designElement.style.display = 'none';
+            designImg.src = '';
+        }
+    }
+
+    openBtn.addEventListener('click', () => {
+        syncDesignFromFront();
+        updateModelView();
+        modal.classList.add('active');
+        
+        // Optional: close mobile sidebar if open
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('menuBackdrop');
+        if (sidebar && backdrop) {
+            sidebar.classList.remove('open');
+            backdrop.classList.remove('open');
+        }
+    });
+
+    closeBtn.addEventListener('click', () => {
+        modal.classList.remove('active');
+    });
+
+    genderBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            genderBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentGender = btn.getAttribute('data-val');
+            updateModelView();
+        });
+    });
+
+    sizeBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            sizeBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentSize = btn.getAttribute('data-val');
+            updateModelView();
+        });
+    });
+});

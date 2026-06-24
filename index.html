@@ -72,13 +72,13 @@
                     </div>
                 </div>
 
-                <!-- COLLAR BACK VIEW (NO MASK) -->
+                <!-- COLLAR BACK VIEW -->
                 <div class="view-card" id="view-collar" data-view="outer_collar">
                     <button class="card-delete-btn" title="Remove Design">✕</button>
                     <div class="drop-hint">DRAG & DROP<br>DESIGN HERE</div>
                     <div class="mockup-container" id="container-collar">
                         <img class="base-shirt" src="assets/outer_collar.png" crossorigin="anonymous">
-                        <div class="design-area unmasked-area">
+                        <div class="design-area masked-area">
                             <div class="design-element resizable-draggable">
                                 <img class="design-img" src="" alt="design">
                                 <div class="resize-handle top-left"></div>
@@ -120,6 +120,11 @@
                 <div class="current-file" id="currentFile">NO FILE SELECTED</div>
             </div>
 
+            <div class="control-section">
+                <h2>MODEL PREVIEW</h2>
+                <button class="export-btn-large" id="openModelPreviewBtn" style="background-color: #0044ff; border-color: #0044ff;">VIEW ON MODEL</button>
+            </div>
+
             <div class="control-section" style="margin-top: auto;">
                 <button class="export-btn-large" id="exportBtn">EXPORT VIEW</button>
             </div>
@@ -137,6 +142,49 @@
         </svg>
         MENU
     </button>
+    
+    <!-- Model Preview Modal -->
+    <div class="modal-overlay" id="modelModal">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="closeModelModalBtn">✕</button>
+            <div class="modal-header">
+                <h2>MODEL PREVIEW</h2>
+            </div>
+            
+            <div class="modal-body">
+                <div class="model-settings">
+                    <div class="setting-group">
+                        <label>GENDER</label>
+                        <div class="toggle-group" id="genderToggle">
+                            <button class="toggle-btn active" data-val="male">MALE</button>
+                            <button class="toggle-btn" data-val="female">FEMALE</button>
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label>SIZE (Simulation)</label>
+                        <div class="toggle-group" id="sizeToggle">
+                            <button class="toggle-btn" data-val="S">S</button>
+                            <button class="toggle-btn active" data-val="M">M</button>
+                            <button class="toggle-btn" data-val="L">L</button>
+                            <button class="toggle-btn" data-val="XL">XL</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="model-preview-stage">
+                    <div class="mockup-container" id="modelMockupContainer">
+                        <img class="base-shirt" id="modelBaseImage" src="assets/model_male.png" crossorigin="anonymous">
+                        <!-- We use a similar setup for the design area -->
+                        <div class="design-area model-masked-area" id="modelMaskArea">
+                            <div class="design-element" id="modelDesignElement">
+                                <img class="design-img" id="modelDesignImg" src="" alt="design">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- Custom Script -->
     <script src="app.js?v=10"></script>

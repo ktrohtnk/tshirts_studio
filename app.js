@@ -515,13 +515,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const modelConfig = {
         male: {
             offsetX: 0,
-            offsetY: 0, 
-            scale: 1.0  
+            offsetY: 180, 
+            scale: 0.75  
         },
         female: {
             offsetX: 0,
-            offsetY: 0,
-            scale: 1.0
+            offsetY: 180,
+            scale: 0.75
         }
     };
 
@@ -530,7 +530,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateModelView() {
         // Update image and mask based on gender with cache buster
-        const cacheBust = '?v=6';
+        const cacheBust = '?v=7';
         baseImg.src = `assets/model_${currentGender}.png${cacheBust}`;
         maskArea.style.maskImage = `url('assets/mask_model_${currentGender}.png${cacheBust}')`;
         maskArea.style.webkitMaskImage = `url('assets/mask_model_${currentGender}.png${cacheBust}')`;

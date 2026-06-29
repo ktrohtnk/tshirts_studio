@@ -364,6 +364,43 @@ body {
 .bottom-left { bottom: -10px; left: -10px; border-bottom: 3px solid #00f3ff; border-left: 3px solid #00f3ff; cursor: nesw-resize; }
 .bottom-right { bottom: -10px; right: -10px; border-bottom: 3px solid #00f3ff; border-right: 3px solid #00f3ff; cursor: nwse-resize; }
 
+.rotate-handle {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 28px;
+    background-color: #00f3ff;
+    border-radius: 50%;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: auto;
+    transition: opacity 0.2s, transform 0.2s;
+    cursor: crosshair;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.rotate-handle::before {
+    content: "↻";
+    color: #000;
+    font-weight: bold;
+    font-size: 16px;
+    margin-top: -2px;
+}
+
+.design-element:hover .rotate-handle,
+.design-element:active .rotate-handle {
+    opacity: 1;
+}
+
+.rotate-handle:hover {
+    transform: translateX(-50%) scale(1.2);
+}
+
 
 .design-img {
     width: 100%;
@@ -712,7 +749,8 @@ body {
     cursor: move;
 }
 
-#modelDesignElement .resize-handle {
+#modelDesignElement .resize-handle,
+#modelDesignElement .rotate-handle {
     display: none !important;
 }
 

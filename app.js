@@ -159,7 +159,8 @@ interact('.resizable-draggable')
         x += (event.deltaRect.left / scale);
         y += (event.deltaRect.top / scale);
 
-        target.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+        var angle = parseFloat(target.getAttribute('data-angle')) || 0;
+        target.style.transform = `translate(${x}px, ${y}px) rotate(${angle}deg)`;
 
         target.setAttribute('data-x', x);
         target.setAttribute('data-y', y);
@@ -177,20 +178,49 @@ interact('.resizable-draggable')
         }
     });
 
-function dragMoveListener (event) {
-    var target = event.target;
-    var scale = getScale(target);
+function dragMoveListener(event) {
+    const target = event.target;
+    const scale = getScale(target);
     // keep the dragged position in the data-x/data-y attributes
-    var x = (parseFloat(target.getAttribute('data-x')) || 0) + (event.dx / scale);
-    var y = (parseFloat(target.getAttribute('data-y')) || 0) + (event.dy / scale);
+    const x = (parseFloat(target.getAttribute('data-x')) || 0) + (event.dx / scale);
+    const y = (parseFloat(target.getAttribute('data-y')) || 0) + (event.dy / scale);
+    const angle = parseFloat(target.getAttribute('data-angle')) || 0;
 
-    // translate the element
-    target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+    // translate and rotate the element
+    target.style.transform = `translate(${x}px, ${y}px) rotate(${angle}deg)`;
 
-    // update the posiion attributes
+    // update the position attributes
     target.setAttribute('data-x', x);
     target.setAttribute('data-y', y);
 }
+
+window.dragMoveListener = dragMoveListener;
+
+// Handle rotation with the new rotate-handle
+interact('.rotate-handle').draggable({
+    onstart: function (event) {
+        const target = event.target.parentElement;
+        const rect = target.getBoundingClientRect();
+        
+        target.setAttribute('data-center-x', rect.left + rect.width / 2);
+        target.setAttribute('data-center-y', rect.top + rect.height / 2);
+    },
+    onmove: function (event) {
+        const target = event.target.parentElement;
+        const cx = parseFloat(target.getAttribute('data-center-x'));
+        const cy = parseFloat(target.getAttribute('data-center-y'));
+        
+        const angle = Math.atan2(event.clientY - cy, event.clientX - cx) * 180 / Math.PI;
+        const newAngle = angle + 90; // offset because handle is at top
+        
+        target.setAttribute('data-angle', newAngle);
+        
+        const x = parseFloat(target.getAttribute('data-x')) || 0;
+        const y = parseFloat(target.getAttribute('data-y')) || 0;
+        
+        target.style.transform = `translate(${x}px, ${y}px) rotate(${newAngle}deg)`;
+    }
+});
 
 
 function applyImageToCard(dataUrl, targetCard) {
@@ -541,7 +571,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateModelView() {
         // Update image and mask based on gender with cache buster
-        const cacheBust = '?v=10';
+        const cacheBust = '?v=11';
         baseImg.src = `assets/model_${currentGender}.png${cacheBust}`;
         maskArea.style.maskImage = `url('assets/mask_model_${currentGender}.png${cacheBust}')`;
         maskArea.style.webkitMaskImage = `url('assets/mask_model_${currentGender}.png${cacheBust}')`;
@@ -556,9 +586,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const finalX = baseX + config.offsetX + customOffsetX;
         const finalY = baseY + config.offsetY + customOffsetY;
+        const angle = parseFloat(designElement.getAttribute('data-angle')) || 0;
         
         // The scale applies around the center of the design
-        designElement.style.transform = `translate(${finalX}px, ${finalY}px) scale(${multiplier})`;
+        designElement.style.transform = `translate(${finalX}px, ${finalY}px) rotate(${angle}deg) scale(${multiplier})`;
     }
 
     function syncDesignFromFront() {
@@ -575,11 +606,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // We copy over the physical width
             designElement.style.width = frontEl.style.width || frontEl.offsetWidth + 'px';
             
-            // And position
+            // And position/rotation
             const x = parseFloat(frontEl.getAttribute('data-x')) || 0;
             const y = parseFloat(frontEl.getAttribute('data-y')) || 0;
+            const angle = parseFloat(frontEl.getAttribute('data-angle')) || 0;
+            
             designElement.setAttribute('data-x', x);
             designElement.setAttribute('data-y', y);
+            designElement.setAttribute('data-angle', angle);
         } else {
             designElement.style.display = 'none';
             designImg.src = '';

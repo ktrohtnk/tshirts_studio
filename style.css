@@ -745,14 +745,7 @@ body {
 }
 
 /* We don't need resize handles on the model view, it's just a preview */
-#modelDesignElement {
-    cursor: move;
-}
 
-#modelDesignElement .resize-handle,
-#modelDesignElement .rotate-handle {
-    display: none !important;
-}
 
 @media (max-width: 768px) {
     .modal-content {

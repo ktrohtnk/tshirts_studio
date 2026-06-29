@@ -215,10 +215,14 @@ interact('.rotate-handle').draggable({
         
         target.setAttribute('data-angle', newAngle);
         
-        const x = parseFloat(target.getAttribute('data-x')) || 0;
-        const y = parseFloat(target.getAttribute('data-y')) || 0;
-        
-        target.style.transform = `translate(${x}px, ${y}px) rotate(${newAngle}deg)`;
+        if (target.id === 'modelDesignElement') {
+            target.dispatchEvent(new Event('modelUpdateTransform'));
+        } else {
+            const x = parseFloat(target.getAttribute('data-x')) || 0;
+            const y = parseFloat(target.getAttribute('data-y')) || 0;
+            
+            target.style.transform = `translate(${x}px, ${y}px) rotate(${newAngle}deg)`;
+        }
     }
 });
 
@@ -568,6 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSize = 'M';
     let customOffsetX = 0;
     let customOffsetY = 0;
+    let customScaleMultiplier = 1.0;
 
     function updateModelView() {
         // Update image and mask based on gender with cache buster
@@ -578,8 +583,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const config = modelConfig[currentGender];
         
-        // Apply size multiplier combined with the model's base scale
-        const multiplier = (sizeMultipliers[currentSize] || 1.0) * config.scale;
+        // Apply size multiplier combined with the model's base scale and any custom drag scaling
+        const multiplier = (sizeMultipliers[currentSize] || 1.0) * config.scale * customScaleMultiplier;
         
         const baseX = parseFloat(designElement.getAttribute('data-x')) || 0;
         const baseY = parseFloat(designElement.getAttribute('data-y')) || 0;
@@ -600,6 +605,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (frontEl.classList.contains('active') && frontImg.src) {
             customOffsetX = 0;
             customOffsetY = 0;
+            customScaleMultiplier = 1.0;
             designImg.src = frontImg.src;
             designElement.style.display = 'block';
             
@@ -638,6 +644,10 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.classList.remove('active');
     });
 
+    designElement.addEventListener('modelUpdateTransform', () => {
+        updateModelView();
+    });
+
     genderBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             genderBtns.forEach(b => b.classList.remove('active'));
@@ -646,6 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Reset custom drag offsets when changing styles
             customOffsetX = 0;
             customOffsetY = 0;
+            customScaleMultiplier = 1.0;
             updateModelView();
         });
     });
@@ -660,18 +671,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Make the model design element draggable
-    interact(designElement).draggable({
-        listeners: {
-            move(event) {
-                const config = modelConfig[currentGender];
-                const multiplier = (sizeMultipliers[currentSize] || 1.0) * config.scale;
-                
-                // Convert screen movement pixels to visual pixels based on scale
-                customOffsetX += event.dx / multiplier;
-                customOffsetY += event.dy / multiplier;
-                updateModelView();
+    // Make the model design element draggable and resizable
+    interact(designElement)
+        .draggable({
+            listeners: {
+                move(event) {
+                    const config = modelConfig[currentGender];
+                    const multiplier = (sizeMultipliers[currentSize] || 1.0) * config.scale * customScaleMultiplier;
+                    
+                    // Convert screen movement pixels to visual pixels based on scale
+                    customOffsetX += event.dx / multiplier;
+                    customOffsetY += event.dy / multiplier;
+                    updateModelView();
+                }
             }
-        }
-    });
+        })
+        .resizable({
+            edges: { top: '.top-left, .top-right', left: '.top-left, .bottom-left', bottom: '.bottom-left, .bottom-right', right: '.top-right, .bottom-right' },
+            modifiers: [ interact.modifiers.aspectRatio({ ratio: 'preserve' }) ],
+            listeners: {
+                move(event) {
+                    const currentWidth = event.rect.width; // Screen width before this move iteration
+                    if (currentWidth > 0 && event.deltaRect.width !== 0) {
+                        // Calculate percentage change in width
+                        const scaleChange = 1 + (event.deltaRect.width / currentWidth);
+                        customScaleMultiplier *= scaleChange;
+                        updateModelView();
+                    }
+                }
+            }
+        });
 });

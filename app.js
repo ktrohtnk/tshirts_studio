@@ -76,21 +76,25 @@ designElements.forEach(el => {
 
 // Scale tracking for responsive design
 function getScale(target) {
-    const card = target.closest('.view-card');
+    const card = target.closest('.view-card') || target.closest('.model-preview-stage');
     if (!card) return 1;
     
     const isMobile = window.innerWidth <= 768;
-    const isGridView = document.getElementById('previewContainer').classList.contains('grid-view');
+    const isGridView = document.getElementById('previewContainer') && document.getElementById('previewContainer').classList.contains('grid-view');
     
     // Default: scale to fit width
     let scale = card.offsetWidth / 800;
     
     // On mobile single view (9:16 ratio), scale up to fill vertical space better
     // We use a blend of width and height to make it immersive without cutting off too much.
-    if (isMobile && !isGridView) {
+    if (isMobile && !isGridView && card.classList.contains('view-card')) {
         const heightScale = card.offsetHeight / 800;
         // Use heightScale * 0.85 so it fills most of the vertical space, cropping sides.
         scale = Math.max(scale, heightScale * 0.85);
+    } else if (card.classList.contains('model-preview-stage')) {
+        // For the model preview stage, ensure the full 800x800 container fits within the bounds
+        const heightScale = card.offsetHeight / 800;
+        scale = Math.min(scale, heightScale);
     }
     
     return scale;
@@ -108,7 +112,12 @@ const resizeObserver = new ResizeObserver(entries => {
 });
 viewCards.forEach(card => resizeObserver.observe(card));
 
-// Setup Drag and Resize using interact.js
+document.addEventListener('DOMContentLoaded', () => {
+    const modelStage = document.querySelector('.model-preview-stage');
+    if (modelStage) {
+        resizeObserver.observe(modelStage);
+    }
+});// Setup Drag and Resize using interact.js
 interact('.resizable-draggable')
     .draggable({
         inertia: true,
@@ -532,7 +541,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateModelView() {
         // Update image and mask based on gender with cache buster
-        const cacheBust = '?v=9';
+        const cacheBust = '?v=10';
         baseImg.src = `assets/model_${currentGender}.png${cacheBust}`;
         maskArea.style.maskImage = `url('assets/mask_model_${currentGender}.png${cacheBust}')`;
         maskArea.style.webkitMaskImage = `url('assets/mask_model_${currentGender}.png${cacheBust}')`;

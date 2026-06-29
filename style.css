@@ -286,16 +286,16 @@ body {
 
 /* Masked areas for Front and Back */
 #container-front .masked-area {
-    mask-image: url('assets/mask_front.png?v=10');
+    mask-image: url('assets/mask_front.png?v=12');
     mask-size: contain; mask-position: center; mask-repeat: no-repeat;
-    -webkit-mask-image: url('assets/mask_front.png?v=10');
+    -webkit-mask-image: url('assets/mask_front.png?v=12');
     -webkit-mask-size: contain; -webkit-mask-position: center; -webkit-mask-repeat: no-repeat;
 }
 
 #container-back .masked-area {
-    mask-image: url('assets/mask_back.png?v=10');
+    mask-image: url('assets/mask_back.png?v=12');
     mask-size: contain; mask-position: center; mask-repeat: no-repeat;
-    -webkit-mask-image: url('assets/mask_back.png?v=10');
+    -webkit-mask-image: url('assets/mask_back.png?v=12');
     -webkit-mask-size: contain; -webkit-mask-position: center; -webkit-mask-repeat: no-repeat;
 }
 
@@ -307,9 +307,9 @@ body {
 }
 
 #container-collar .masked-area {
-    mask-image: url('assets/mask_collar.png?v=10');
+    mask-image: url('assets/mask_collar.png?v=12');
     mask-size: contain; mask-position: center; mask-repeat: no-repeat;
-    -webkit-mask-image: url('assets/mask_collar.png?v=10');
+    -webkit-mask-image: url('assets/mask_collar.png?v=12');
     -webkit-mask-size: contain; -webkit-mask-position: center; -webkit-mask-repeat: no-repeat;
 }
 

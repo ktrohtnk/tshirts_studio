@@ -394,32 +394,41 @@ exportBtn.addEventListener('click', async () => {
     loadingOverlay.classList.add('active');
 
     try {
+        const SCALE_FACTOR = 2.5; // Export at 2000x2000 resolution instead of 800x800
+        const BASE_SIZE = 800;
+        const EXPORT_SIZE = BASE_SIZE * SCALE_FACTOR;
+
         const canvas = document.createElement('canvas');
-        canvas.width = 800;
-        canvas.height = 800;
+        canvas.width = EXPORT_SIZE;
+        canvas.height = EXPORT_SIZE;
         const ctx = canvas.getContext('2d');
 
         // Draw Base Shirt
-        ctx.drawImage(baseShirtImg, 0, 0, 800, 800);
+        ctx.drawImage(baseShirtImg, 0, 0, EXPORT_SIZE, EXPORT_SIZE);
 
         // Draw Design if active
         if (designElement.classList.contains('active') && designImg.src) {
             const designCanvas = document.createElement('canvas');
-            designCanvas.width = 800;
-            designCanvas.height = 800;
+            designCanvas.width = EXPORT_SIZE;
+            designCanvas.height = EXPORT_SIZE;
             const dCtx = designCanvas.getContext('2d');
 
-            // Calculate design element position
-            const x = parseFloat(designElement.getAttribute('data-x')) || 0;
-            const y = parseFloat(designElement.getAttribute('data-y')) || 0;
-            const width = parseFloat(designElement.style.width) || designElement.offsetWidth || 300;
+            // Calculate design element position and rotation, scaled up
+            const x = (parseFloat(designElement.getAttribute('data-x')) || 0) * SCALE_FACTOR;
+            const y = (parseFloat(designElement.getAttribute('data-y')) || 0) * SCALE_FACTOR;
+            const width = (parseFloat(designElement.style.width) || designElement.offsetWidth || 300) * SCALE_FACTOR;
+            const angle = parseFloat(designElement.getAttribute('data-angle')) || 0;
             
             // We need to determine the height based on aspect ratio
             const imgAspect = designImg.naturalHeight / designImg.naturalWidth;
             const height = width * imgAspect;
 
-            // Draw design onto temp canvas
-            dCtx.drawImage(designImg, x, y, width, height);
+            // Save context, translate to center of design, rotate, draw, restore
+            dCtx.save();
+            dCtx.translate(x + width / 2, y + height / 2);
+            dCtx.rotate(angle * Math.PI / 180);
+            dCtx.drawImage(designImg, -width / 2, -height / 2, width, height);
+            dCtx.restore();
 
             // Apply Mask
             const maskImg = new Image();
@@ -435,7 +444,7 @@ exportBtn.addEventListener('click', async () => {
 
             if (maskImg.complete && maskImg.naturalWidth > 0) {
                 dCtx.globalCompositeOperation = 'destination-in';
-                dCtx.drawImage(maskImg, 0, 0, 800, 800);
+                dCtx.drawImage(maskImg, 0, 0, EXPORT_SIZE, EXPORT_SIZE);
             }
 
             // Draw masked design onto main canvas

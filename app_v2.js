@@ -409,7 +409,7 @@ exportBtn.addEventListener('click', async () => {
         ctx.drawImage(baseShirtImg, 0, 0, EXPORT_SIZE, EXPORT_SIZE);
 
         // Draw Design if active
-        if (designElement.classList.contains('active') && designImg.src) {
+        if (designElement && designElement.classList.contains('active') && designImg && designImg.src) {
             const designCanvas = document.createElement('canvas');
             designCanvas.width = EXPORT_SIZE;
             designCanvas.height = EXPORT_SIZE;

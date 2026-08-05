@@ -708,7 +708,7 @@ document.addEventListener('DOMContentLoaded', () => {
         views.forEach(v => {
             const container = document.querySelector(v.id);
             if(container) {
-                container.querySelector('.base-shirt').src = `assets/${v.base}${suffix}.png`;
+                container.querySelector('.base-shirt').src = `assets/${v.base}${suffix}.png?v=21`;
                 const maskedArea = container.querySelector('.masked-area');
                 if(maskedArea) {
                     const maskUrl = `url('assets/${v.mask}${suffix}.png?v=21')`;

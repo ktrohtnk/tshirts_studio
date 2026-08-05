@@ -2,7 +2,6 @@
 const fileInput = document.getElementById('fileInput');
 const currentFile = document.getElementById('currentFile');
 const loadingOverlay = document.getElementById('loadingOverlay');
-const bodyColorBtns = document.querySelectorAll('#bodyColorToggle .toggle-btn');
 
 let currentBodyColor = 'white';
 const exportBtn = document.getElementById('exportBtn');
@@ -684,6 +683,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    const bodyColorBtns = document.querySelectorAll('#bodyColorToggle .toggle-btn');
     bodyColorBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             bodyColorBtns.forEach(b => b.classList.remove('active'));

@@ -437,7 +437,9 @@ exportBtn.addEventListener('click', async () => {
             maskImg.crossOrigin = "anonymous";
             // viewName is 'front', 'back', 'inner_tag', or 'outer_collar'
             let maskName = viewName.replace('_tag', '').replace('outer_', '');
-            maskImg.src = `assets/mask_${maskName}.png`;
+            
+            const suffix = currentBodyColor === 'black' ? '_black' : '';
+            maskImg.src = `assets/mask_${maskName}${suffix}.png`;
             
             await new Promise((resolve) => {
                 maskImg.onload = resolve;
@@ -590,8 +592,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const cacheBust = '?v=11';
         const suffix = currentBodyColor === 'black' ? '_black' : '';
         baseImg.src = `assets/model_${currentGender}${suffix}.png${cacheBust}`;
-        maskArea.style.maskImage = `url('assets/mask_model_${currentGender}.png${cacheBust}')`;
-        maskArea.style.webkitMaskImage = `url('assets/mask_model_${currentGender}.png${cacheBust}')`;
+        maskArea.style.maskImage = `url('assets/mask_model_${currentGender}${suffix}.png${cacheBust}')`;
+        maskArea.style.webkitMaskImage = `url('assets/mask_model_${currentGender}${suffix}.png${cacheBust}')`;
         
         const config = modelConfig[currentGender];
         
@@ -695,10 +697,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateBodyColor() {
         const suffix = currentBodyColor === 'black' ? '_black' : '';
-        document.querySelector('#container-front .base-shirt').src = `assets/front${suffix}.png`;
-        document.querySelector('#container-back .base-shirt').src = `assets/back${suffix}.png`;
-        document.querySelector('#container-collar .base-shirt').src = `assets/outer_collar${suffix}.png`;
-        document.querySelector('#container-inner .base-shirt').src = `assets/inner_tag${suffix}.png`;
+        
+        const views = [
+            { id: '#container-front', base: 'front', mask: 'mask_front' },
+            { id: '#container-back', base: 'back', mask: 'mask_back' },
+            { id: '#container-collar', base: 'outer_collar', mask: 'mask_collar' },
+            { id: '#container-inner', base: 'inner_tag', mask: 'mask_inner' }
+        ];
+
+        views.forEach(v => {
+            const container = document.querySelector(v.id);
+            if(container) {
+                container.querySelector('.base-shirt').src = `assets/${v.base}${suffix}.png`;
+                const maskedArea = container.querySelector('.masked-area');
+                if(maskedArea) {
+                    const maskUrl = `url('assets/${v.mask}${suffix}.png?v=18')`;
+                    maskedArea.style.maskImage = maskUrl;
+                    maskedArea.style.webkitMaskImage = maskUrl;
+                }
+            }
+        });
         
         // Ensure model view is updated if modal is open
         if (typeof updateModelView === 'function') {

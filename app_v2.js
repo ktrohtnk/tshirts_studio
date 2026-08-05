@@ -711,7 +711,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 container.querySelector('.base-shirt').src = `assets/${v.base}${suffix}.png`;
                 const maskedArea = container.querySelector('.masked-area');
                 if(maskedArea) {
-                    const maskUrl = `url('assets/${v.mask}${suffix}.png?v=18')`;
+                    const maskUrl = `url('assets/${v.mask}${suffix}.png?v=19')`;
                     maskedArea.style.maskImage = maskUrl;
                     maskedArea.style.webkitMaskImage = maskUrl;
                 }

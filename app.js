@@ -2,6 +2,9 @@
 const fileInput = document.getElementById('fileInput');
 const currentFile = document.getElementById('currentFile');
 const loadingOverlay = document.getElementById('loadingOverlay');
+const bodyColorBtns = document.querySelectorAll('#bodyColorToggle .toggle-btn');
+
+let currentBodyColor = 'white';
 const exportBtn = document.getElementById('exportBtn');
 const viewBtns = document.querySelectorAll('.view-btn');
 const viewCards = document.querySelectorAll('.view-card');
@@ -586,7 +589,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateModelView() {
         // Update image and mask based on gender with cache buster
         const cacheBust = '?v=11';
-        baseImg.src = `assets/model_${currentGender}.png${cacheBust}`;
+        const suffix = currentBodyColor === 'black' ? '_black' : '';
+        baseImg.src = `assets/model_${currentGender}${suffix}.png${cacheBust}`;
         maskArea.style.maskImage = `url('assets/mask_model_${currentGender}.png${cacheBust}')`;
         maskArea.style.webkitMaskImage = `url('assets/mask_model_${currentGender}.png${cacheBust}')`;
         
@@ -679,6 +683,28 @@ document.addEventListener('DOMContentLoaded', () => {
             updateModelView();
         });
     });
+
+    bodyColorBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            bodyColorBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentBodyColor = btn.getAttribute('data-color');
+            updateBodyColor();
+        });
+    });
+
+    function updateBodyColor() {
+        const suffix = currentBodyColor === 'black' ? '_black' : '';
+        document.querySelector('#container-front .base-shirt').src = `assets/front${suffix}.png`;
+        document.querySelector('#container-back .base-shirt').src = `assets/back${suffix}.png`;
+        document.querySelector('#container-collar .base-shirt').src = `assets/outer_collar${suffix}.png`;
+        document.querySelector('#container-inner .base-shirt').src = `assets/inner_tag${suffix}.png`;
+        
+        // Ensure model view is updated if modal is open
+        if (typeof updateModelView === 'function') {
+            updateModelView();
+        }
+    }
 
     // Make the model design element draggable and resizable
     interact(designElement)

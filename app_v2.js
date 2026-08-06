@@ -452,7 +452,7 @@ exportBtn.addEventListener('click', async () => {
             }
 
             // Draw masked design onto main canvas
-            ctx.globalCompositeOperation = 'multiply';
+            ctx.globalCompositeOperation = currentBodyColor === 'black' ? 'source-over' : 'multiply';
             ctx.drawImage(designCanvas, 0, 0);
             ctx.globalCompositeOperation = 'source-over'; // restore defaults
         }
@@ -609,6 +609,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // The scale applies around the center of the design
         designElement.style.transform = `translate(${finalX}px, ${finalY}px) rotate(${angle}deg) scale(${multiplier})`;
+        
+        if (designImg) {
+            designImg.style.mixBlendMode = currentBodyColor === 'black' ? 'normal' : 'multiply';
+        }
     }
 
     function syncDesignFromFront() {
@@ -714,6 +718,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     const maskUrl = `url('assets/${v.mask}${suffix}.png?v=21')`;
                     maskedArea.style.maskImage = maskUrl;
                     maskedArea.style.webkitMaskImage = maskUrl;
+                }
+                const designImg = container.querySelector('.design-img');
+                if (designImg) {
+                    designImg.style.mixBlendMode = currentBodyColor === 'black' ? 'normal' : 'multiply';
                 }
             }
         });

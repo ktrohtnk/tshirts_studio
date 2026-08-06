@@ -704,6 +704,15 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.classList.remove('black-mode');
         }
         
+        // Force repaint hack for Safari/WebKit blend mode bugs
+        const allDesignImgs = document.querySelectorAll('.design-img');
+        allDesignImgs.forEach(img => {
+            const oldDisplay = img.style.display;
+            img.style.display = 'none';
+            img.offsetHeight; // trigger reflow
+            img.style.display = oldDisplay;
+        });
+        
         const views = [
             { id: '#container-front', base: 'front', mask: 'mask_front' },
             { id: '#container-back', base: 'back', mask: 'mask_back' },

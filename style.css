@@ -284,8 +284,6 @@ body {
     mix-blend-mode: multiply;
 }
 
-body.black-mode .design-area,
-body.black-mode .design-element,
 body.black-mode .design-img {
     mix-blend-mode: screen !important;
 }

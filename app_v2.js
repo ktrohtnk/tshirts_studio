@@ -236,6 +236,7 @@ function applyImageToCard(dataUrl, targetCard) {
     
     if (img && el) {
         img.src = dataUrl;
+        img.style.mixBlendMode = currentBodyColor === 'black' ? 'screen' : 'multiply';
         el.classList.add('active');
         targetCard.classList.add('has-design');
     }
@@ -609,6 +610,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // The scale applies around the center of the design
         designElement.style.transform = `translate(${finalX}px, ${finalY}px) rotate(${angle}deg) scale(${multiplier})`;
+        
+        if (designImg) {
+            designImg.style.mixBlendMode = currentBodyColor === 'black' ? 'screen' : 'multiply';
+        }
     }
 
     function syncDesignFromFront() {
@@ -621,6 +626,7 @@ document.addEventListener('DOMContentLoaded', () => {
             customOffsetY = 0;
             customScaleMultiplier = 1.0;
             designImg.src = frontImg.src;
+            designImg.style.mixBlendMode = currentBodyColor === 'black' ? 'screen' : 'multiply';
             designElement.style.display = 'block';
             
             // We copy over the physical width
@@ -729,6 +735,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     const maskUrl = `url('assets/${v.mask}${suffix}.png?v=21')`;
                     maskedArea.style.maskImage = maskUrl;
                     maskedArea.style.webkitMaskImage = maskUrl;
+                }
+                const designImg = container.querySelector('.design-img');
+                if (designImg) {
+                    designImg.style.mixBlendMode = currentBodyColor === 'black' ? 'screen' : 'multiply';
                 }
             }
         });

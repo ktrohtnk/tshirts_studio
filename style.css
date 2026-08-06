@@ -238,6 +238,11 @@ body {
     letter-spacing: 2px;
 }
 
+body.black-mode .drop-hint {
+    color: #ccff00; /* Yellow-green for visibility on black */
+    border-color: rgba(204, 255, 0, 0.3);
+}
+
 .view-card.has-design .drop-hint {
     opacity: 0;
 }

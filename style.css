@@ -290,7 +290,7 @@ body.black-mode .drop-hint {
 }
 
 body.black-mode .design-area {
-    mix-blend-mode: screen !important;
+    mix-blend-mode: normal !important;
 }
 
 

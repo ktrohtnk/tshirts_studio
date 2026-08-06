@@ -238,7 +238,7 @@ function applyImageToCard(dataUrl, targetCard) {
     if (img && el) {
         img.src = dataUrl;
         if (area) {
-            area.style.mixBlendMode = currentBodyColor === 'black' ? 'screen' : 'multiply';
+            area.style.mixBlendMode = currentBodyColor === 'black' ? 'normal' : 'multiply';
         }
         el.classList.add('active');
         targetCard.classList.add('has-design');
@@ -456,7 +456,7 @@ exportBtn.addEventListener('click', async () => {
             }
 
             // Draw masked design onto main canvas
-            ctx.globalCompositeOperation = currentBodyColor === 'black' ? 'screen' : 'multiply';
+            ctx.globalCompositeOperation = currentBodyColor === 'black' ? 'source-over' : 'multiply';
             ctx.drawImage(designCanvas, 0, 0);
             ctx.globalCompositeOperation = 'source-over'; // restore defaults
         }
@@ -616,7 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const designArea = container.querySelector('.design-area');
         if (designArea) {
-            designArea.style.mixBlendMode = currentBodyColor === 'black' ? 'screen' : 'multiply';
+            designArea.style.mixBlendMode = currentBodyColor === 'black' ? 'normal' : 'multiply';
         }
     }
 
@@ -635,7 +635,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // But this is just syncDesignFromFront... let's just grab the current designArea
             const currentArea = designImg.closest('.design-area');
             if (currentArea) {
-                currentArea.style.mixBlendMode = currentBodyColor === 'black' ? 'screen' : 'multiply';
+                currentArea.style.mixBlendMode = currentBodyColor === 'black' ? 'normal' : 'multiply';
             }
             designElement.style.display = 'block';
             
@@ -748,7 +748,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 const designArea = container.querySelector('.design-area');
                 if (designArea) {
-                    designArea.style.mixBlendMode = currentBodyColor === 'black' ? 'screen' : 'multiply';
+                    designArea.style.mixBlendMode = currentBodyColor === 'black' ? 'normal' : 'multiply';
                 }
             }
         });

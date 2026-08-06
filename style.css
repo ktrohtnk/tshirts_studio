@@ -284,6 +284,10 @@ body {
     mix-blend-mode: multiply;
 }
 
+body.black-mode .design-img {
+    mix-blend-mode: normal !important;
+}
+
 /* Masked areas for Front and Back */
 #container-front .masked-area {
     mask-image: url('assets/mask_front.png?v=12');

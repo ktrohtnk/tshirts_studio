@@ -609,10 +609,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // The scale applies around the center of the design
         designElement.style.transform = `translate(${finalX}px, ${finalY}px) rotate(${angle}deg) scale(${multiplier})`;
-        
-        if (designImg) {
-            designImg.style.mixBlendMode = currentBodyColor === 'black' ? 'normal' : 'multiply';
-        }
     }
 
     function syncDesignFromFront() {
@@ -702,6 +698,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateBodyColor() {
         const suffix = currentBodyColor === 'black' ? '_black' : '';
         
+        if (currentBodyColor === 'black') {
+            document.body.classList.add('black-mode');
+        } else {
+            document.body.classList.remove('black-mode');
+        }
+        
         const views = [
             { id: '#container-front', base: 'front', mask: 'mask_front' },
             { id: '#container-back', base: 'back', mask: 'mask_back' },
@@ -718,10 +720,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const maskUrl = `url('assets/${v.mask}${suffix}.png?v=21')`;
                     maskedArea.style.maskImage = maskUrl;
                     maskedArea.style.webkitMaskImage = maskUrl;
-                }
-                const designImg = container.querySelector('.design-img');
-                if (designImg) {
-                    designImg.style.mixBlendMode = currentBodyColor === 'black' ? 'normal' : 'multiply';
                 }
             }
         });

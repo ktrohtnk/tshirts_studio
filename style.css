@@ -287,7 +287,7 @@ body {
 body.black-mode .design-area,
 body.black-mode .design-element,
 body.black-mode .design-img {
-    mix-blend-mode: normal !important;
+    mix-blend-mode: screen !important;
 }
 
 

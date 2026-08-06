@@ -452,7 +452,7 @@ exportBtn.addEventListener('click', async () => {
             }
 
             // Draw masked design onto main canvas
-            ctx.globalCompositeOperation = currentBodyColor === 'black' ? 'source-over' : 'multiply';
+            ctx.globalCompositeOperation = currentBodyColor === 'black' ? 'screen' : 'multiply';
             ctx.drawImage(designCanvas, 0, 0);
             ctx.globalCompositeOperation = 'source-over'; // restore defaults
         }

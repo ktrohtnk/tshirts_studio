@@ -289,7 +289,7 @@ body.black-mode .drop-hint {
     mix-blend-mode: multiply;
 }
 
-body.black-mode .design-img {
+body.black-mode .design-area {
     mix-blend-mode: screen !important;
 }
 

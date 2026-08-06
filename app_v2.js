@@ -233,10 +233,13 @@ function applyImageToCard(dataUrl, targetCard) {
     if (!targetCard) return;
     const img = targetCard.querySelector('.design-img');
     const el = targetCard.querySelector('.design-element');
+    const area = targetCard.querySelector('.design-area');
     
     if (img && el) {
         img.src = dataUrl;
-        img.style.mixBlendMode = currentBodyColor === 'black' ? 'screen' : 'multiply';
+        if (area) {
+            area.style.mixBlendMode = currentBodyColor === 'black' ? 'screen' : 'multiply';
+        }
         el.classList.add('active');
         targetCard.classList.add('has-design');
     }
@@ -611,8 +614,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // The scale applies around the center of the design
         designElement.style.transform = `translate(${finalX}px, ${finalY}px) rotate(${angle}deg) scale(${multiplier})`;
         
-        if (designImg) {
-            designImg.style.mixBlendMode = currentBodyColor === 'black' ? 'screen' : 'multiply';
+        const designArea = container.querySelector('.design-area');
+        if (designArea) {
+            designArea.style.mixBlendMode = currentBodyColor === 'black' ? 'screen' : 'multiply';
         }
     }
 
@@ -626,7 +630,13 @@ document.addEventListener('DOMContentLoaded', () => {
             customOffsetY = 0;
             customScaleMultiplier = 1.0;
             designImg.src = frontImg.src;
-            designImg.style.mixBlendMode = currentBodyColor === 'black' ? 'screen' : 'multiply';
+            const designArea = frontCard.querySelector('.design-area'); // actually we want the target card area
+            const targetArea = document.getElementById('view-back').querySelector('.design-area');
+            // But this is just syncDesignFromFront... let's just grab the current designArea
+            const currentArea = designImg.closest('.design-area');
+            if (currentArea) {
+                currentArea.style.mixBlendMode = currentBodyColor === 'black' ? 'screen' : 'multiply';
+            }
             designElement.style.display = 'block';
             
             // We copy over the physical width
@@ -736,9 +746,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     maskedArea.style.maskImage = maskUrl;
                     maskedArea.style.webkitMaskImage = maskUrl;
                 }
-                const designImg = container.querySelector('.design-img');
-                if (designImg) {
-                    designImg.style.mixBlendMode = currentBodyColor === 'black' ? 'screen' : 'multiply';
+                const designArea = container.querySelector('.design-area');
+                if (designArea) {
+                    designArea.style.mixBlendMode = currentBodyColor === 'black' ? 'screen' : 'multiply';
                 }
             }
         });
